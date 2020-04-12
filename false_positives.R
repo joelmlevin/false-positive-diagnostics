@@ -2,10 +2,7 @@
 #' title: "Estimating false positive rates with simulation"
 #' author: Joel Levin
 #' date: "April 12, 2020"
-#' output: 
-#'    html_document:
-#'      toc: true
-#'      toc_float: true
+#' output: github_document
 #' ---
 
 
