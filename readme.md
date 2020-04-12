@@ -3,7 +3,7 @@ Estimating false positive rates with simulation
 Joel Levin
 April 12, 2020
 
-This version: 2020-04-12 13:11:45.  
+This version: 2020-04-12 15:58:56.  
 You can contact Joel at <joelmlevin@gmail.com>.
 
 ## Description
@@ -87,8 +87,8 @@ optional.
 
 ``` r
 diagnostics <- function(data, type = c("table", "plot"), quantiles = c(.01, .05, .10, .5)) {
-  comparitors <- round(quantile(data, quantiles), 4)
-  temp <- cbind(quantiles, comparitors)
+  values <- round(quantile(data, quantiles), 4)
+  temp <- cbind(quantiles, values)
   
     if(type == "table") {
       return(temp)
@@ -127,13 +127,13 @@ t.test(real_dv ~ real_conditions)
     ##  Welch Two Sample t-test
     ## 
     ## data:  real_dv by real_conditions
-    ## t = -0.90006, df = 90.085, p-value = 0.3705
+    ## t = -0.13333, df = 97.964, p-value = 0.8942
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -6.135013  2.309273
+    ##  -4.374064  3.823330
     ## sample estimates:
     ## mean in group 1 mean in group 2 
-    ##        19.53892        21.45179
+    ##        18.70323        18.97859
 
 Now using the function to simulate p values for random experimental
 conditions
@@ -150,25 +150,25 @@ simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, test_t
 simulated_ps[1:10]
 ```
 
-    ##  [1] 0.17416838 0.82437434 0.42130946 0.02833715 0.90954167 0.67483709
-    ##  [7] 0.22920349 0.43576945 0.60011890 0.57542034
+    ##  [1] 0.5416774 0.9016172 0.6729485 0.5321681 0.2495026 0.5241475 0.1179447
+    ##  [8] 0.9376294 0.7429206 0.2064827
 
 ### Now using the diagnostic functions.
 
-The diagnostic table gives shows you the p values (comparitors) at
-various percentiles (quantiles). The closer the two are, the better the
-test is behaving. Note that this is also affected by the number of
-replications used to generate the simulated data.
+The diagnostic table gives shows you the p values (values) at various
+percentiles (quantiles). The closer the two are, the better the test is
+behaving. Note that this is also affected by the number of replications
+used to generate the simulated data.
 
 ``` r
 diagnostics(simulated_ps, type = "table")
 ```
 
-    ##     quantiles comparitors
-    ## 1%       0.01      0.0099
-    ## 5%       0.05      0.0495
-    ## 10%      0.10      0.1022
-    ## 50%      0.50      0.4969
+    ##     quantiles values
+    ## 1%       0.01 0.0093
+    ## 5%       0.05 0.0494
+    ## 10%      0.10 0.0982
+    ## 50%      0.50 0.4969
 
 The diagnostic plot simply combines both values in a plot with a
 reference line. The closer the points are to the reference line, the
@@ -212,6 +212,6 @@ uniform.test(hist(simulated_ps))
     ##  Chi-squared test for given probabilities
     ## 
     ## data:  hist.output$counts
-    ## X-squared = 23.36, df = 19, p-value = 0.2219
+    ## X-squared = 17.904, df = 19, p-value = 0.5289
 
 (Later, add in the plotting functions)

@@ -66,8 +66,8 @@ simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poiss
 #'1. `quantiles`: a vector of percentiles at which to compare the simulated p values to their observed frequency. this argument is prespecified at recommended values and is therefore optional.
 
 diagnostics <- function(data, type = c("table", "plot"), quantiles = c(.01, .05, .10, .5)) {
-  comparitors <- round(quantile(data, quantiles), 4)
-  temp <- cbind(quantiles, comparitors)
+  values <- round(quantile(data, quantiles), 4)
+  temp <- cbind(quantiles, values)
   
     if(type == "table") {
       return(temp)
@@ -97,7 +97,7 @@ simulated_ps[1:10]
 
 #' ### Now using the diagnostic functions.
 #' 
-#' The diagnostic table gives shows you the p values (comparitors) at various percentiles (quantiles). The closer the two are, the better the test is behaving. Note that this is also affected by the number of replications used to generate the simulated data. 
+#' The diagnostic table gives shows you the p values (values) at various percentiles (quantiles). The closer the two are, the better the test is behaving. Note that this is also affected by the number of replications used to generate the simulated data. 
 diagnostics(simulated_ps, type = "table")
 
 #' The diagnostic plot simply combines both values in a plot with a reference line. The closer the points are to the reference line, the better behaved the test.
