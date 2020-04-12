@@ -5,7 +5,6 @@
 #' output: github_document
 #' ---
 
-
 #' This version: `r format(Sys.time())`.  
 #' You can contact Joel at joelmlevin@gmail.com.
 
@@ -29,6 +28,17 @@ options(scipen = 999)
 
 simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poisson", "ols", "t-test"), replications = 10000) {
   
+  # tests
+  if(test_type != "poisson" & test_type != "ols" & test_type != "t-test") {
+    stop("Please specify a test type using the `test_type` argument. The available tests are 'poisson', 'ols', and 't-test.")
+    }
+  if(is.numeric(outcome_vector != TRUE)) {
+    stop("outcome_vector must be a numeric vector.")
+    }
+  if(is.integer(outcome_vector/num_conditions) != TRUE) {
+    warning("Function may behave strangely if there are unequal numbers of observations per condition.")
+    }
+  
   tests <- rep(NA, replications) # generate an empty vector of appropriate length. this will be overwritten with p values
   
   # looping to fill in each element of the `tests` vector
@@ -38,7 +48,7 @@ simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poiss
     # conducting the tests    
     if(test_type == "poisson") {
     tests[n] <-  coef(summary(glm(outcome_vector ~ false_condition, family = poisson)))[2, 1:4][4]
-    }
+    } 
     if(test_type == "ols") {
       tests[n] <-  coef(summary(lm(outcome_vector ~ false_condition)))[2, 1:4][4]
     }
@@ -81,8 +91,7 @@ real_dv <- rnorm(100, 20, 10)
 t.test(real_dv ~ real_conditions)
 
 #' Now using the function to simulate p values for random experimental conditions
-simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, 
-                            test_type = "t-test", replications = 10000)
+simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, test_type = "t-test", replications = 10000)
 
 simulated_ps[1:10]
 

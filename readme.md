@@ -3,7 +3,7 @@ Estimating false positive rates with simulation
 Joel Levin
 April 12, 2020
 
-This version: 2020-04-12 12:25:09.  
+This version: 2020-04-12 13:11:45.  
 You can contact Joel at <joelmlevin@gmail.com>.
 
 ## Description
@@ -38,6 +38,17 @@ corresponding frequency (e.g., 5% of the time). The arguments include:
 ``` r
 simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poisson", "ols", "t-test"), replications = 10000) {
   
+  # tests
+  if(test_type != "poisson" & test_type != "ols" & test_type != "t-test") {
+    stop("Please specify a test type using the `test_type` argument. The available tests are 'poisson', 'ols', and 't-test.")
+    }
+  if(is.numeric(outcome_vector != TRUE)) {
+    stop("outcome_vector must be a numeric vector.")
+    }
+  if(is.integer(outcome_vector/num_conditions) != TRUE) {
+    warning("Function may behave strangely if there are unequal numbers of observations per condition.")
+    }
+  
   tests <- rep(NA, replications) # generate an empty vector of appropriate length. this will be overwritten with p values
   
   # looping to fill in each element of the `tests` vector
@@ -47,7 +58,7 @@ simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poiss
     # conducting the tests    
     if(test_type == "poisson") {
     tests[n] <-  coef(summary(glm(outcome_vector ~ false_condition, family = poisson)))[2, 1:4][4]
-    }
+    } 
     if(test_type == "ols") {
       tests[n] <-  coef(summary(lm(outcome_vector ~ false_condition)))[2, 1:4][4]
     }
@@ -116,26 +127,31 @@ t.test(real_dv ~ real_conditions)
     ##  Welch Two Sample t-test
     ## 
     ## data:  real_dv by real_conditions
-    ## t = 0.13339, df = 96.952, p-value = 0.8942
+    ## t = -0.90006, df = 90.085, p-value = 0.3705
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -3.596231  4.114463
+    ##  -6.135013  2.309273
     ## sample estimates:
     ## mean in group 1 mean in group 2 
-    ##        20.38756        20.12844
+    ##        19.53892        21.45179
 
 Now using the function to simulate p values for random experimental
 conditions
 
 ``` r
-simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, 
-                            test_type = "t-test", replications = 10000)
+simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, test_type = "t-test", replications = 10000)
+```
 
+    ## Warning in simulate_fp(outcome_vector = real_dv, num_conditions = 2,
+    ## test_type = "t-test", : Function may behave strangely if there are unequal
+    ## numbers of observations per condition.
+
+``` r
 simulated_ps[1:10]
 ```
 
-    ##  [1] 0.9728038 0.6012338 0.3861158 0.2213838 0.7933293 0.8322469 0.2687333
-    ##  [8] 0.7213555 0.6033797 0.6076678
+    ##  [1] 0.17416838 0.82437434 0.42130946 0.02833715 0.90954167 0.67483709
+    ##  [7] 0.22920349 0.43576945 0.60011890 0.57542034
 
 ### Now using the diagnostic functions.
 
@@ -149,10 +165,10 @@ diagnostics(simulated_ps, type = "table")
 ```
 
     ##     quantiles comparitors
-    ## 1%       0.01      0.0091
-    ## 5%       0.05      0.0491
-    ## 10%      0.10      0.0944
-    ## 50%      0.50      0.4998
+    ## 1%       0.01      0.0099
+    ## 5%       0.05      0.0495
+    ## 10%      0.10      0.1022
+    ## 50%      0.50      0.4969
 
 The diagnostic plot simply combines both values in a plot with a
 reference line. The closer the points are to the reference line, the
@@ -196,6 +212,6 @@ uniform.test(hist(simulated_ps))
     ##  Chi-squared test for given probabilities
     ## 
     ## data:  hist.output$counts
-    ## X-squared = 19.296, df = 19, p-value = 0.438
+    ## X-squared = 23.36, df = 19, p-value = 0.2219
 
 (Later, add in the plotting functions)
