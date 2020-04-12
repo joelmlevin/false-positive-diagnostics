@@ -26,17 +26,17 @@ options(scipen = 999)
 #'3. `test_type`: the statistical test used. this currently supports `"poisson", "ols", "t-test"`.
 #'4. `replications`: the number of tests to simulate. this defaults to 10,000 tests, which is usually sufficient. if you're not in a hurry and have a modern-ish machine, make it 100,000.
 
-simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poisson", "ols", "t-test"), replications = 10000) {
+simulate_fp <- function(outcome_vector, num_conditions, test_type = c("poisson", "ols", "t-test"), replications = 10000) {
   
   # tests
-  if(test_type != "poisson" & test_type != "ols" & test_type != "t-test") {
+  if(test_type != "poisson" & test_type != "ols" & test_type != "t-test") { # test type must conform to available types
     stop("Please specify a test type using the `test_type` argument. The available tests are 'poisson', 'ols', and 't-test.")
     }
-  if(is.numeric(outcome_vector != TRUE)) {
+  if(is.numeric(outcome_vector != TRUE)) { # outcome vector must be numeric
     stop("outcome_vector must be a numeric vector.")
     }
-  if(is.integer(outcome_vector/num_conditions) != TRUE) {
-    warning("Function may behave strangely if there are unequal numbers of observations per condition.")
+  if(all.equal(num_conditions, as.integer(num_conditions)) != TRUE | num_conditions < 1) { # must be an integer greater than 1
+    stop("Please specify the number of conditions in your study using the num_conditions argument.")
     }
   
   tests <- rep(NA, replications) # generate an empty vector of appropriate length. this will be overwritten with p values
@@ -67,7 +67,8 @@ simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poiss
 
 diagnostics <- function(data, type = c("table", "plot"), quantiles = c(.01, .05, .10, .5)) {
   values <- round(quantile(data, quantiles), 4)
-  temp <- cbind(quantiles, values)
+  difference <- abs(quantiles - values)
+  temp <- cbind(quantiles, values, difference)
   
     if(type == "table") {
       return(temp)

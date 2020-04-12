@@ -3,7 +3,7 @@ Estimating false positive rates with simulation
 Joel Levin
 April 12, 2020
 
-This version: 2020-04-12 15:58:56.  
+This version: 2020-04-12 16:14:48.  
 You can contact Joel at <joelmlevin@gmail.com>.
 
 ## Description
@@ -36,17 +36,17 @@ corresponding frequency (e.g., 5% of the time). The arguments include:
 <!-- end list -->
 
 ``` r
-simulate_fp <- function(outcome_vector, num_conditions = 2, test_type = c("poisson", "ols", "t-test"), replications = 10000) {
+simulate_fp <- function(outcome_vector, num_conditions, test_type = c("poisson", "ols", "t-test"), replications = 10000) {
   
   # tests
-  if(test_type != "poisson" & test_type != "ols" & test_type != "t-test") {
+  if(test_type != "poisson" & test_type != "ols" & test_type != "t-test") { # test type must conform to available types
     stop("Please specify a test type using the `test_type` argument. The available tests are 'poisson', 'ols', and 't-test.")
     }
-  if(is.numeric(outcome_vector != TRUE)) {
+  if(is.numeric(outcome_vector != TRUE)) { # outcome vector must be numeric
     stop("outcome_vector must be a numeric vector.")
     }
-  if(is.integer(outcome_vector/num_conditions) != TRUE) {
-    warning("Function may behave strangely if there are unequal numbers of observations per condition.")
+  if(all.equal(num_conditions, as.integer(num_conditions)) != TRUE | num_conditions < 1) { # must be an integer greater than 1
+    stop("Please specify the number of conditions in your study using the num_conditions argument.")
     }
   
   tests <- rep(NA, replications) # generate an empty vector of appropriate length. this will be overwritten with p values
@@ -88,7 +88,8 @@ optional.
 ``` r
 diagnostics <- function(data, type = c("table", "plot"), quantiles = c(.01, .05, .10, .5)) {
   values <- round(quantile(data, quantiles), 4)
-  temp <- cbind(quantiles, values)
+  difference <- abs(quantiles - values)
+  temp <- cbind(quantiles, values, difference)
   
     if(type == "table") {
       return(temp)
@@ -127,31 +128,25 @@ t.test(real_dv ~ real_conditions)
     ##  Welch Two Sample t-test
     ## 
     ## data:  real_dv by real_conditions
-    ## t = -0.13333, df = 97.964, p-value = 0.8942
+    ## t = 1.7462, df = 97.267, p-value = 0.08394
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -4.374064  3.823330
+    ##  -0.4915194  7.6895990
     ## sample estimates:
     ## mean in group 1 mean in group 2 
-    ##        18.70323        18.97859
+    ##        22.17401        18.57497
 
 Now using the function to simulate p values for random experimental
 conditions
 
 ``` r
 simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, test_type = "t-test", replications = 10000)
-```
 
-    ## Warning in simulate_fp(outcome_vector = real_dv, num_conditions = 2,
-    ## test_type = "t-test", : Function may behave strangely if there are unequal
-    ## numbers of observations per condition.
-
-``` r
 simulated_ps[1:10]
 ```
 
-    ##  [1] 0.5416774 0.9016172 0.6729485 0.5321681 0.2495026 0.5241475 0.1179447
-    ##  [8] 0.9376294 0.7429206 0.2064827
+    ##  [1] 0.5797376 0.2253706 0.8057099 0.9038649 0.7043477 0.7958923 0.9190687
+    ##  [8] 0.3814329 0.8110108 0.3780656
 
 ### Now using the diagnostic functions.
 
@@ -164,11 +159,11 @@ used to generate the simulated data.
 diagnostics(simulated_ps, type = "table")
 ```
 
-    ##     quantiles values
-    ## 1%       0.01 0.0093
-    ## 5%       0.05 0.0494
-    ## 10%      0.10 0.0982
-    ## 50%      0.50 0.4969
+    ##     quantiles values difference
+    ## 1%       0.01 0.0094     0.0006
+    ## 5%       0.05 0.0514     0.0014
+    ## 10%      0.10 0.1007     0.0007
+    ## 50%      0.50 0.5017     0.0017
 
 The diagnostic plot simply combines both values in a plot with a
 reference line. The closer the points are to the reference line, the
@@ -212,6 +207,6 @@ uniform.test(hist(simulated_ps))
     ##  Chi-squared test for given probabilities
     ## 
     ## data:  hist.output$counts
-    ## X-squared = 17.904, df = 19, p-value = 0.5289
+    ## X-squared = 8.024, df = 19, p-value = 0.9864
 
 (Later, add in the plotting functions)
