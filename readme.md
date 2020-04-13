@@ -3,17 +3,51 @@ Estimating false positive rates with simulation
 Joel Levin
 April 12, 2020
 
-This version: 2020-04-12 16:14:48.  
+This version: 2020-04-13 09:13:56.  
 You can contact Joel at <joelmlevin@gmail.com>.
 
 ## Description
 
-This is a script to test the true false positive rate of any statistical
-test that one is using to evaluate experimental results. The motivation
-to conduct this test came from [this working
-paper](https://psyarxiv.com/cyv6d/) by Ryan, Evers, & Moore (2018). I
-used this stimulation to estimate the false positive rate of a poisson
-regression, but it can be used to evaluate any test.
+This is a script to evaluate the false positive rate of a statistical
+test. In its current form, it is designed for experimental tests, but it
+can be easily adapted to evaluate any test. The motivation to conduct
+this test came from [this working paper](https://psyarxiv.com/cyv6d/) by
+Ryan, Evers, & Moore (2018). I used this stimulation to estimate the
+false positive rate of a poisson regression,as suggested by Ryan et al.,
+but it can be used to evaluate any test.
+
+The intuition behind this test is as follows: when we read a p value
+associated with an experimental test, we interpret it as the probability
+of a false positive – i.e., the probability of observing an effect at
+least as large if our manipulation had no true effect. For some tests,
+the p value does not correspond directly to the true false positive
+rate, which presents a problem for those who wish to interpret it.
+Statistical explanatios this phenomenon are beyond the scope of this
+document, but it’s worth noting that the probability of a false positive
+can vary as a function of the distributional form of the test’s
+dependent measure. Fortunately, the false positive rate of any test can
+be made in to a relatively simple empirical question.
+
+To evaluate a test’s false positive rate, you can simply run your test a
+bunch of times using your real dependent data but randomized
+experimental conditions. Then, to estimate your false positive rate, you
+can count how many of those tests are statistically significant. To
+adjust your observed p value to account for this false positive rate,
+you can count how many tests have p values at least as small as your
+observed p value.
+
+## What an inflated false positive rate looks like
+
+The below figure was generated using data from one of my projects. We
+conducted an experiment in which the dependent measure was a count
+between 0 and 3. The statistical test that we preregistered was a
+poisson regression, and the test yielded a p value of 0.027. Using the
+function that I describe below, we simulated both the false positive
+rate (10.4%) and the rate at which we observed p values at least as
+small as our own (6.6%). You can see the code that was used to generate
+this graph in the file `false_positives.R`, in this repo.
+
+![](false_positives_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ## Basic functions
 
@@ -128,13 +162,13 @@ t.test(real_dv ~ real_conditions)
     ##  Welch Two Sample t-test
     ## 
     ## data:  real_dv by real_conditions
-    ## t = 1.7462, df = 97.267, p-value = 0.08394
+    ## t = 0.19869, df = 93.836, p-value = 0.8429
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.4915194  7.6895990
+    ##  -3.280400  4.009935
     ## sample estimates:
     ## mean in group 1 mean in group 2 
-    ##        22.17401        18.57497
+    ##        20.54685        20.18208
 
 Now using the function to simulate p values for random experimental
 conditions
@@ -145,8 +179,8 @@ simulated_ps <- simulate_fp(outcome_vector = real_dv, num_conditions = 2, test_t
 simulated_ps[1:10]
 ```
 
-    ##  [1] 0.5797376 0.2253706 0.8057099 0.9038649 0.7043477 0.7958923 0.9190687
-    ##  [8] 0.3814329 0.8110108 0.3780656
+    ##  [1] 0.6662975 0.9669222 0.4740433 0.6105617 0.8162617 0.6514470 0.3298478
+    ##  [8] 0.8846670 0.2634358 0.1951311
 
 ### Now using the diagnostic functions.
 
@@ -160,10 +194,10 @@ diagnostics(simulated_ps, type = "table")
 ```
 
     ##     quantiles values difference
-    ## 1%       0.01 0.0094     0.0006
-    ## 5%       0.05 0.0514     0.0014
-    ## 10%      0.10 0.1007     0.0007
-    ## 50%      0.50 0.5017     0.0017
+    ## 1%       0.01 0.0107     0.0007
+    ## 5%       0.05 0.0527     0.0027
+    ## 10%      0.10 0.1014     0.0014
+    ## 50%      0.50 0.4929     0.0071
 
 The diagnostic plot simply combines both values in a plot with a
 reference line. The closer the points are to the reference line, the
@@ -173,7 +207,7 @@ better behaved the test.
 diagnostics(simulated_ps, type = "plot")
 ```
 
-![](false_positives_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](false_positives_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 We can also conduct a test to more rigorously evaluate whether our
 statistical test is well behaved. The below function was written by
@@ -201,12 +235,12 @@ that we’re fine.
 uniform.test(hist(simulated_ps))
 ```
 
-![](false_positives_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](false_positives_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
     ## 
     ##  Chi-squared test for given probabilities
     ## 
     ## data:  hist.output$counts
-    ## X-squared = 8.024, df = 19, p-value = 0.9864
+    ## X-squared = 12.056, df = 19, p-value = 0.8832
 
 (Later, add in the plotting functions)

@@ -11,10 +11,39 @@
 #+ echo=FALSE, include=FALSE
 library(tidyverse)
 options(scipen = 999)
+knitr::opts_knit$set(root.dir = "/Users/joelmlevin/Box\ Sync/Misc\ Code/False\ positive\ rate/false-positive-diagnostics")
 
 #' ## Description
 
-#' This is a script to test the true false positive rate of any statistical test that one is using to evaluate experimental results. The motivation to conduct this test came from [this working paper](https://psyarxiv.com/cyv6d/) by Ryan, Evers, & Moore (2018). I used this stimulation to estimate the false positive rate of a poisson regression, but it can be used to evaluate any test.
+#' This is a script to evaluate the false positive rate of a statistical test. In its current form, it is designed for experimental tests, but it can be easily adapted to evaluate any test. The motivation to conduct this test came from [this working paper](https://psyarxiv.com/cyv6d/) by Ryan, Evers, & Moore (2018). I used this stimulation to estimate the false positive rate of a poisson regression,as suggested by Ryan et al., but it can be used to evaluate any test.  
+#' 
+#' The intuition behind this test is as follows: when we read a p value associated with an experimental test, we interpret it as the probability of a false positive -- i.e., the probability of observing an effect at least as large if our manipulation had no true effect. For some tests, the p value does not correspond directly to the true false positive rate, which presents a problem for those who wish to interpret it. Statistical explanatios this phenomenon are beyond the scope of this document, but it's worth noting that the probability of a false positive can vary as a function of the distributional form of the test's dependent measure. Fortunately, the false positive rate of any test can be made in to a relatively simple empirical question.  
+#' 
+#' To evaluate a test's false positive rate, you can simply run your test a bunch of times using your real dependent data but randomized experimental conditions. Then, to estimate your false positive rate, you can count how many of those tests are statistically significant. To adjust your observed p value to account for this false positive rate, you can count how many tests have p values at least as small as your observed p value. 
+#+
+#' ## What an inflated false positive rate looks like
+
+#' The below figure was generated using data from one of my projects. We conducted an experiment in which the dependent measure was a count between 0 and 3. The statistical test that we preregistered was a poisson regression, and the test yielded a p value of 0.027. Using the function that I describe below, we simulated both the false positive rate (10.4%) and the rate at which we observed p values at least as small as our own (6.6%). You can see the code that was used to generate this graph in the file `false_positives.R`, in this repo.
+#' 
+#+ echo=FALSE, include=TRUE, warning = FALSE
+# simulated p values from one of my studies
+simulated_p_values <-  read_rds("/Users/joelmlevin/Dropbox/Language\ in\ Advice/Harvard\ Housing\ Lottery\ Study/simulated_p_values.rds")
+# the p value from the preregistered poisson regression
+prereg_p <- 0.02687537  
+as_tibble(simulated_p_values) %>%
+  ggplot() +
+  geom_histogram(aes(x = value,
+                     fill = ifelse(value >= prereg_p, "95% of values", "5% of values")),
+                 bins = 500) +
+  geom_vline(xintercept = .05, linetype = "dotted", size = .75) +
+  labs(title = "Our poisson regression has an elevated false positive rate",
+       x = "p value",
+       caption = "100,000 simulated trials. Each bin contains 200 trials.
+       The observed false positive rate is ~10.4% (the proportion of p values <= .05).
+       Our prespecified test yields a p value of .027.
+       After correcting for the higher than expected rate of false positives, our p-value becomes .066.",
+       fill = "") +
+  scale_x_continuous(breaks = c(0, .05, .5, 1))
 
 #+
 #' ## Basic functions
