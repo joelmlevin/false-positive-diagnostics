@@ -22,7 +22,7 @@ of a false positive – i.e., the probability of observing an effect at
 least as large if our manipulation had no true effect. For some tests,
 the p value does not correspond directly to the true false positive
 rate, which presents a problem for those who wish to interpret it.
-Statistical explanations this phenomenon are beyond the scope of this
+Statistical explanations for this phenomenon are beyond the scope of this
 document, but it’s worth noting that the probability of a false positive
 can vary as a function of the distributional form of the test’s
 dependent measure. Fortunately, the false positive rate of any test can
