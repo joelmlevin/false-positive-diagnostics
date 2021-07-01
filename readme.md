@@ -242,5 +242,3 @@ uniform.test(hist(simulated_ps))
     ## 
     ## data:  hist.output$counts
     ## X-squared = 12.056, df = 19, p-value = 0.8832
-
-(Later, add in the plotting functions)
