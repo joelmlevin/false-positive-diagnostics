@@ -3,16 +3,13 @@ Estimating false positive rates with simulation
 Joel Levin
 April 12, 2020
 
-This version: 2020-04-13 09:13:56.  
-You can contact Joel at <joelmlevin@gmail.com>.
-
 ## Description
 
 This is a script to evaluate the false positive rate of a statistical
 test. In its current form, it is designed for experimental tests, but it
 can be easily adapted to evaluate any test. The motivation to conduct
-this test came from [this working paper](https://psyarxiv.com/cyv6d/) by
-Ryan, Evers, & Moore (2018). I used this stimulation to estimate the
+this test came from [this paper](https://doi.org/10.1525/collabra.27242) by
+Ryan, Evers, & Moore (2021). I used this stimulation to estimate the
 false positive rate of a poisson regression,as suggested by Ryan et al.,
 but it can be used to evaluate any test.
 
