@@ -1,0 +1,19 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: False Positive Diagnostics
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Joel
+    family-names: Levin
+    email: joelmlevin@gmail.com
+    affiliation: University of Pittsburgh
+    orcid: 'https://orcid.org/0000-0002-4095-4840'
+repository-code: 'https://github.com/joelmlevin/false-positive-diagnostics'
+abstract: >-
+  A simulation-based method for identifying false positive
+  rates in experimental data.
